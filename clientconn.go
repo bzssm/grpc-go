@@ -1138,6 +1138,7 @@ func (ac *addrConn) adjustParams(r transport.GoAwayReason) {
 	}
 }
 
+// 看起来这里在频繁定时触发resolveNow
 func (ac *addrConn) resetTransport() {
 	for i := 0; ; i++ {
 		if i > 0 {
@@ -1220,6 +1221,8 @@ func (ac *addrConn) resetTransport() {
 
 		// Block until the created transport is down. And when this happens,
 		// we restart from the top of the addr list.
+		// 在一切正常的情况下，这里会控制真正的下一次resolve
+		// 在随机选择的一个连接真正断开之后，这里才会触发
 		<-reconnect.Done()
 		hcancel()
 		// restart connecting - the top of the loop will set state to
@@ -1238,6 +1241,10 @@ func (ac *addrConn) resetTransport() {
 // tryAllAddrs tries to creates a connection to the addresses, and stop when at the
 // first successful one. It returns the transport, the address and a Event in
 // the successful case. The Event fires when the returned transport disconnects.
+// 这里四个返回值， newTr, addr, reconnect, err 需要确定两件事：
+// 1. addr是什么： 可以连得上的一个连接
+// 2. reconnect的条件是什么，因为reconnect控制了下一次的resolve：连接正常或不正常断开
+// 但是，这里的tryAllAddrs实际上只会返回成功连接的address
 func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.Time) (transport.ClientTransport, resolver.Address, *grpcsync.Event, error) {
 	var firstConnErr error
 	for _, addr := range addrs {
@@ -1259,6 +1266,7 @@ func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.T
 
 		channelz.Infof(logger, ac.channelzID, "Subchannel picks a new address %q to connect", addr.Addr)
 
+		// 这里的reconnect是返回的reconnect
 		newTr, reconnect, err := ac.createTransport(addr, copts, connectDeadline)
 		if err == nil {
 			return newTr, addr, reconnect, nil
