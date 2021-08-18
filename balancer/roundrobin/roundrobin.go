@@ -56,7 +56,11 @@ func (*rrPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	for sc := range info.ReadySCs {
 		scs = append(scs, sc)
 	}
-	fmt.Printf("[rrPickerBuilder]建立picker成功， subconns: %+v", scs)
+	subc := ""
+	for _, v := range info.ReadySCs {
+		subc += v.Address.Addr + "\n"
+	}
+	fmt.Printf("[rrPickerBuilder]建立picker成功， subconns: %v", subc)
 	return &rrPicker{
 		subConns: scs,
 		// Start at a random index, as the same RR balancer rebuilds a new
