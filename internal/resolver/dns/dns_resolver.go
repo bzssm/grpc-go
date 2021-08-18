@@ -210,6 +210,7 @@ func (d *dnsResolver) Close() {
 // 这个watcher只是看有没有需要更新dns的时候，并不是真正触发dns更新的地方
 func (d *dnsResolver) watcher() {
 	defer d.wg.Done()
+	tk := time.NewTicker(30 * time.Second)
 	backoffIndex := 1
 	for {
 		state, err := d.lookup()
@@ -244,6 +245,7 @@ func (d *dnsResolver) watcher() {
 			timer.Stop()
 			return
 		case <-timer.C:
+		case <-tk.C:
 		}
 	}
 }
