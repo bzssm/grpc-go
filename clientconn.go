@@ -1251,6 +1251,11 @@ func (ac *addrConn) resetTransport() {
 // 但是，这里的tryAllAddrs实际上只会返回成功连接的address
 func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.Time) (transport.ClientTransport, resolver.Address, *grpcsync.Event, error) {
 	var firstConnErr error
+	info := ""
+	for _, addr := range addrs {
+		info += addr.Addr + " "
+	}
+	fmt.Println("[addrConn.tryAllAddrs]addrs包含了： ", info)
 	for _, addr := range addrs {
 		ac.mu.Lock()
 		if ac.state == connectivity.Shutdown {
