@@ -72,7 +72,7 @@ func (ccb *ccBalancerWrapper) watcher() {
 	for {
 		select {
 		case t := <-ccb.updateCh.Get():
-			fmt.Println("[ccBalancerWrapper.watcher]这里从ccb的updateCh拿到了消息")
+			fmt.Println("[ccBalancerWrapper.watcher]从ccb的updateCh拿到了消息")
 			ccb.updateCh.Load()
 			if ccb.closed.HasFired() {
 				break
@@ -81,7 +81,7 @@ func (ccb *ccBalancerWrapper) watcher() {
 			case *scStateUpdate:
 				ccb.balancerMu.Lock()
 				// 这里看起来像是已经知道了subconn的状态，然后去更新Picker，并不是真正获得subconn所有状态
-				fmt.Println("[ccBalancerWrapper.watcher]这里准备调用ccb.balancer去更新subconn的状态")
+				fmt.Println("[ccBalancerWrapper.watcher]准备调用ccb.balancer去更新subconn的状态")
 				ccb.balancer.UpdateSubConnState(u.sc, balancer.SubConnState{ConnectivityState: u.state, ConnectionError: u.err})
 				ccb.balancerMu.Unlock()
 			case *acBalancerWrapper:

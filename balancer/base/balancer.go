@@ -245,8 +245,10 @@ func (b *baseBalancer) UpdateSubConnState(sc balancer.SubConn, state balancer.Su
 		b.state == connectivity.TransientFailure {
 		b.regeneratePicker()
 	}
+	fmt.Println("[baseBalancer.UpdateSubConnState]regenPicker成功")
 
 	b.cc.UpdateState(balancer.State{ConnectivityState: b.state, Picker: b.picker})
+	fmt.Printf("[baseBalancer.UpdateSubConnState]basebalancer更新subconnstate成功，baseBalancer当前状态：%+v", b.state.String())
 }
 
 // Close is a nop because base balancer doesn't have internal state to clean up,
