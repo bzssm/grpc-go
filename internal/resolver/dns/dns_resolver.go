@@ -213,6 +213,8 @@ func (d *dnsResolver) watcher() {
 	backoffIndex := 1
 	for {
 		state, err := d.lookup()
+		fmt.Println(time.Now().String(), "[dnsResolver.watcher]重新解析了dns")
+		fmt.Printf("[dnsResolver.watcher]dns解析结果：%+v", state.Addresses)
 		if err != nil {
 			// Report error to the underlying grpc.ClientConn.
 			d.cc.ReportError(err)
