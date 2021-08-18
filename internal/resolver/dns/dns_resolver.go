@@ -234,6 +234,7 @@ func (d *dnsResolver) watcher() {
 				timer.Stop()
 				return
 			case <-d.rn:
+			case <-tk.C:
 			}
 		} else {
 			// Poll on an error found in DNS Resolver or an error received from ClientConn.
@@ -245,7 +246,6 @@ func (d *dnsResolver) watcher() {
 			timer.Stop()
 			return
 		case <-timer.C:
-		case <-tk.C:
 		}
 	}
 }
