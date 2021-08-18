@@ -132,6 +132,7 @@ func (dcs *defaultConfigSelector) SelectConfig(rpcInfo iresolver.RPCInfo) (*ires
 // The target name syntax is defined in
 // https://github.com/grpc/grpc/blob/master/doc/naming.md.
 // e.g. to use dns resolver, a "dns:///" prefix should be applied to the target.
+// 客户端建立链接需要调用这个函数
 func DialContext(ctx context.Context, target string, opts ...DialOption) (conn *ClientConn, err error) {
 	cc := &ClientConn{
 		target:            target,
@@ -311,6 +312,8 @@ func DialContext(ctx context.Context, target string, opts ...DialOption) (conn *
 	}
 
 	// Build the resolver.
+	// 这里除了返回了Resolver Wrapper，还把真正的resolver给了rWrapper.resolver
+	// 在build的过程中就会解析一次dns，这时候firstResolveEvent就被fire了
 	rWrapper, err := newCCResolverWrapper(cc, resolverBuilder)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build resolver: %v", err)
@@ -605,6 +608,7 @@ func (cc *ClientConn) maybeApplyDefaultServiceConfig(addrs []resolver.Address) {
 	}
 }
 
+// 第一次建立resolver的时候就会调用这了
 func (cc *ClientConn) updateResolverState(s resolver.State, err error) error {
 	defer cc.firstResolveEvent.Fire()
 	cc.mu.Lock()

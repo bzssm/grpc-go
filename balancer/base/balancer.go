@@ -38,6 +38,7 @@ type baseBuilder struct {
 }
 
 func (bb *baseBuilder) Build(cc balancer.ClientConn, opt balancer.BuildOptions) balancer.Balancer {
+	// 这里说白了就是roundrobin
 	bal := &baseBalancer{
 		cc:            cc,
 		pickerBuilder: bb.pickerBuilder,
@@ -97,6 +98,7 @@ func (b *baseBalancer) ResolverError(err error) {
 	})
 }
 
+// 这里是真正根据resolver state，更新client conn的地方
 func (b *baseBalancer) UpdateClientConnState(s balancer.ClientConnState) error {
 	// TODO: handle s.ResolverState.ServiceConfig?
 	if logger.V(2) {
@@ -202,6 +204,7 @@ func (b *baseBalancer) regeneratePicker() {
 }
 
 func (b *baseBalancer) UpdateSubConnState(sc balancer.SubConn, state balancer.SubConnState) {
+	// 这个只能处理一个subconn
 	s := state.ConnectivityState
 	if logger.V(2) {
 		logger.Infof("base.baseBalancer: handle SubConn state change: %p, %v", sc, s)

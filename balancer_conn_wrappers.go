@@ -51,6 +51,7 @@ type ccBalancerWrapper struct {
 	subConns map[*acBalancerWrapper]struct{}
 }
 
+// 在这里会建立新的balancer
 func newCCBalancerWrapper(cc *ClientConn, b balancer.Builder, bopts balancer.BuildOptions) *ccBalancerWrapper {
 	ccb := &ccBalancerWrapper{
 		cc:       cc,
@@ -60,6 +61,7 @@ func newCCBalancerWrapper(cc *ClientConn, b balancer.Builder, bopts balancer.Bui
 		subConns: make(map[*acBalancerWrapper]struct{}),
 	}
 	go ccb.watcher()
+	// 这里说白了就是roundrobin
 	ccb.balancer = b.Build(ccb, bopts)
 	return ccb
 }
@@ -77,6 +79,7 @@ func (ccb *ccBalancerWrapper) watcher() {
 			switch u := t.(type) {
 			case *scStateUpdate:
 				ccb.balancerMu.Lock()
+				// 这里看起来像是已经知道了subconn的状态，然后去更新Picker，并不是真正获得subconn所有状态
 				ccb.balancer.UpdateSubConnState(u.sc, balancer.SubConnState{ConnectivityState: u.state, ConnectionError: u.err})
 				ccb.balancerMu.Unlock()
 			case *acBalancerWrapper:
@@ -118,6 +121,7 @@ func (ccb *ccBalancerWrapper) close() {
 	<-ccb.done.Done()
 }
 
+// 在这里会给balancer wrapper发信号
 func (ccb *ccBalancerWrapper) handleSubConnStateChange(sc balancer.SubConn, s connectivity.State, err error) {
 	// When updating addresses for a SubConn, if the address in use is not in
 	// the new addresses, the old ac will be tearDown() and a new ac will be

@@ -193,6 +193,7 @@ type dnsResolver struct {
 }
 
 // ResolveNow invoke an immediate resolution of the target that this dnsResolver watches.
+// 这里需要看看到底是哪里触发了这个ResolveNow
 func (d *dnsResolver) ResolveNow(resolver.ResolveNowOptions) {
 	select {
 	case d.rn <- struct{}{}:
@@ -206,6 +207,7 @@ func (d *dnsResolver) Close() {
 	d.wg.Wait()
 }
 
+// 这个watcher只是看有没有需要更新dns的时候，并不是真正触发dns更新的地方
 func (d *dnsResolver) watcher() {
 	defer d.wg.Done()
 	backoffIndex := 1

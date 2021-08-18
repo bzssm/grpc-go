@@ -163,6 +163,46 @@ func NewClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 	return cc.NewStream(ctx, desc, method, opts...)
 }
 
+// protobuf 生成的代码里面会调用这个函数来拿到stream
+/*
+func (c *featureExtractServiceClient) BatchExtractWithBounding(ctx context.Context, in *BatchExtractWithBoundingRequest, opts ...grpc.CallOption) (*BatchExtractWithBoundingResponse, error) {
+	out := new(BatchExtractWithBoundingResponse)
+	err := c.cc.Invoke(ctx, "/sensetime.viper.feature_extract.FeatureExtractService/BatchExtractWithBounding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// grpc/call.go
+// Invoke sends the RPC request on the wire and returns after response is
+// received.  This is typically called by generated code.
+//
+// All errors returned by Invoke are compatible with the status package.
+func (cc *ClientConn) Invoke(ctx context.Context, method string, args, reply interface{}, opts ...CallOption) error {
+	// allow interceptor to see all applicable call options, which means those
+	// configured as defaults from dial option as well as per-call options
+	opts = combine(cc.dopts.callOptions, opts)
+
+	if cc.dopts.unaryInt != nil {
+		return cc.dopts.unaryInt(ctx, method, args, reply, cc, invoke, opts...)
+	}
+	return invoke(ctx, method, args, reply, cc, opts...)
+}
+
+// grpc/call.go
+func invoke(ctx context.Context, method string, req, reply interface{}, cc *ClientConn, opts ...CallOption) error {
+	cs, err := newClientStream(ctx, unaryStreamDesc, cc, method, opts...)
+	if err != nil {
+		return err
+	}
+	if err := cs.SendMsg(req); err != nil {
+		return err
+	}
+	return cs.RecvMsg(reply)
+}
+// 这个newClientStream就是这里
+*/
 func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, method string, opts ...CallOption) (_ ClientStream, err error) {
 	if channelz.IsOn() {
 		cc.incrCallsStarted()
