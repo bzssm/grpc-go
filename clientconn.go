@@ -1142,6 +1142,7 @@ func (ac *addrConn) adjustParams(r transport.GoAwayReason) {
 func (ac *addrConn) resetTransport() {
 	for i := 0; ; i++ {
 		if i > 0 {
+			fmt.Println("[addrConn.resetTransport]这里会触发一次resolveNow！")
 			ac.cc.resolveNow(resolver.ResolveNowOptions{})
 		}
 
@@ -1205,6 +1206,8 @@ func (ac *addrConn) resetTransport() {
 			continue
 		}
 
+		fmt.Printf("[addrConn.resetTransport]尝试addrs成功了，返回的addr是：%v\n", addr.Addr)
+
 		ac.mu.Lock()
 		if ac.state == connectivity.Shutdown {
 			ac.mu.Unlock()
@@ -1224,6 +1227,7 @@ func (ac *addrConn) resetTransport() {
 		// 在一切正常的情况下，这里会控制真正的下一次resolve
 		// 在随机选择的一个连接真正断开之后，这里才会触发
 		<-reconnect.Done()
+		fmt.Println("[addrConn.resetTransport]这里触发了reconnect")
 		hcancel()
 		// restart connecting - the top of the loop will set state to
 		// CONNECTING.  This is against the current connectivity semantics doc,
