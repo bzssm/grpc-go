@@ -22,6 +22,7 @@
 package roundrobin
 
 import (
+	"fmt"
 	"sync"
 
 	"google.golang.org/grpc/balancer"
@@ -55,6 +56,7 @@ func (*rrPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	for sc := range info.ReadySCs {
 		scs = append(scs, sc)
 	}
+	fmt.Printf("[rrPickerBuilder]建立picker成功， subconns: %+v", scs)
 	return &rrPicker{
 		subConns: scs,
 		// Start at a random index, as the same RR balancer rebuilds a new
